@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  spark:
+    build: .
+    container_name: spark-container
+    depends_on:
+      - mysql
+      - cassandra
+    networks:
+      - backend
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "1"
+      MYSQL_DATABASE: "Data_Warehouse"
+    ports:
+      - "3306:3306"
+    networks:
+      - backend
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra-container
+    restart: always
+    ports:
+      - "9042:9042"
+    networks:
+      - backend
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  cassandra_data:
