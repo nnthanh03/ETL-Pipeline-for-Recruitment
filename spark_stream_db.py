@@ -100,7 +100,6 @@ def connect_to_kafka(spark_conn):
 
 def create_cassandra_connection():
     try:
-        # connecting to the cassandra cluster
         cluster = Cluster(
             ['localhost'],
             load_balancing_policy=RoundRobinPolicy()
@@ -131,9 +130,6 @@ def create_selection_df_from_kafka(spark_df):
         .select(from_json(col('value'), schema).alias('data')).select("data.*")
     print(sel)
 
-    # # Tạo create_time cho từng dòng trong DataFrame
-    # sel = sel.withColumn("create_time", lit(str(uuid.uuid1())))
-
     return sel
 
 def process_batch(batch_df, batch_id):
@@ -161,15 +157,6 @@ if __name__ == "__main__":
 
             print("Streaming is being started...")
 
-            # # Tạo timeuuid và chuyển thành chuỗi
-            # create_time_uuid = uuid_from_time(datetime.datetime.now())
-            # create_time_str = str(create_time_uuid)
-
-            # # Sau đó sử dụng lit() để đưa giá trị này vào DataFrame Spark
-            # selection_df = selection_df.withColumn("create_time", lit(create_time_str))
-            # # print(selection_df.count())
-            # # print(selection_df.show())
-
 
             streaming_query = (selection_df.writeStream
                                .foreachBatch(process_batch)
@@ -181,20 +168,5 @@ if __name__ == "__main__":
                                .start())
             
             streaming_query.awaitTermination()
-
-            # streaming_query = (selection_df.writeStream.foreachBatch(process_batch)
-            #                  .format("org.apache.spark.sql.cassandra")
-            #                  .option("checkpointLocation", '/tmp/check_point/')
-            #                  .option("keyspace", "spark_streams")
-            #                  .option("table", "created_jobs")
-            #                  .option("spark.cassandra.connection.host", "localhost")
-            #                  .option("spark.cassandra.auth.username", "cassandra")
-            #                  .option("spark.cassandra.auth.password","cassandra").start())
-
-            # streaming_query.awaitTermination()
-
-# docker logs -it realtime-data-streaming-spark-worker-1 bash
-# ping candrassa
-
 
 
