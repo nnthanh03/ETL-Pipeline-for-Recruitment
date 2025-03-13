@@ -5,8 +5,8 @@ from pyspark.sql.functions import col
 import time
 
 
-CASSANDRA_KEYSPACE = "de_project"
-CASSANDRA_TABLE = "tracking"
+CASSANDRA_KEYSPACE = "spark_streams"
+CASSANDRA_TABLE = "created_jobs"
 
 MYSQL_HOST = "localhost"
 MYSQL_DATABASE = "Data_Warehouse"
@@ -82,6 +82,7 @@ def handle_click(data):
     click_output = spark.sql("""SELECT job_id, date(ts) as dates, hour(ts) as hours, group_id, campaign_id, publisher_id, Round(AVG(bid),2) as bid_set, count(*) as clicks, sum(bid) as spend_hour 
                        FROM clicktable 
                        GROUP BY job_id, campaign_id, group_id, publisher_id, date(ts), hour(ts)""")
+    spark.catalog.dropTempView("clicktable")
     return click_output
 
 def handle_conversion(data):
@@ -97,7 +98,7 @@ def handle_conversion(data):
     conversion_output =  spark.sql("""SELECT job_id, date(ts) as dates, hour(ts) as hours, group_id, campaign_id, publisher_id, Round(AVG(bid),2) as bid_set, count(*) as conversion, sum(bid) as spend_hour 
                        FROM conversiontable 
                        GROUP BY job_id, campaign_id, group_id, publisher_id, date(ts), hour(ts)""")
-
+    spark.catalog.dropTempView("conversiontable")
     return conversion_output
 
 def handle_qualified(data):
@@ -113,7 +114,7 @@ def handle_qualified(data):
     qualified_output = spark.sql("""SELECT job_id, date(ts) as dates, hour(ts) as hours, group_id, campaign_id, publisher_id, Round(AVG(bid),2) as bid_set, count(*) as qualified, sum(bid) as spend_hour 
                        FROM qualifiedtable 
                        GROUP BY job_id, campaign_id, group_id, publisher_id, date(ts), hour(ts)""")
-
+    spark.catalog.dropTempView("qualifiedtable")
     return qualified_output
 
 def handle_unqualified(data):
@@ -129,7 +130,7 @@ def handle_unqualified(data):
     unqualified_output = spark.sql("""SELECT job_id, date(ts) as dates, hour(ts) as hours, group_id, campaign_id, publisher_id, Round(AVG(bid),2) as bid_set, count(*) as unqualified, sum(bid) as spend_hour 
                        FROM unqualifiedtable 
                        GROUP BY job_id, campaign_id, group_id, publisher_id, date(ts), hour(ts)""")
-
+    spark.catalog.dropTempView("unqualifiedtable")
     return unqualified_output
 
 def handle_na_customtrack(data):
@@ -201,6 +202,7 @@ def main():
         print("Latest time in MySQL is: {}".format(mysql_time))
         if (cassandra_time > mysql_time):
             main_task(mysql_time)
+            print("New data found")
         else:
             print("No New data found!")
 
