@@ -4,6 +4,8 @@
 - This project uses Apache Spark (with PySpark) to Extract-Transform-Load (ETL) data from a Data Lake (CassandraDB) into a Data Warehouse (MySQL database) with Star-schema for a Recruitment system.
 - Using Batch Processing technique to automate the ETL process (Near Real-time).
 - The project also uses Docker to install and run the services.
+- Using Kafka to Streaming data from my fake source.
+- Using Airflow to schedule data ingestion and transfer to Cassandra.
 
 ## Requirements
 - Docker
@@ -13,6 +15,18 @@
 - Clone the project from the Github repository:
 ```bash
 git clone https://github.com/nnthanh03/ETL-Pipeline-for-Recruitment.git
+```
+- Start the Docker containers using Docker Compose:
+```bash
+docker-compose up -d
+```
+- Start streaming data to CassandraDB:
+```bash
+python py_stream_db.py
+```
+- Start ETL with batch processing:
+```bash
+python ETL_Pipeline_With_CDC.py
 ```
 
 ## Result
